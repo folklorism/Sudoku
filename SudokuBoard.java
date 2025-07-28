@@ -69,8 +69,101 @@ public class SudokuBoard {
 
         return visualBoard;
     }
+
+    // pre:
+    // post:
+    public boolean isValid(){
+        boolean checkContainsValue = false;
+        Set<Character> matchedBoardVal = new HashSet<>();
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[i].length; j++){
+                char newOneChar = board[i][j];
+                if(!(matchedBoardVal.contains(newOneChar))){
+                    matchedBoardVal.add(newOneChar);
+                }
+                checkContainsValue = matchedBoardVal.contains(newOneChar) || matchedBoardVal.contains('.');
+            }
+        }
+        //char[][] threeByThree = miniSquare(5);
+
+        return checkContainsValue && 
+            noDuplicateRow(this.board) && 
+            noDuplicateColumnn(this.board) &&
+            squareDupes(this.board);
+    }
+
+    // pre:
+    // post:
+    private boolean noDuplicateRow(char[][] checkBoard){
+        // does not contain any duplicates of 1-9 in ROW 
+        // but can with "."
+        Set<Character> checkRowDupes = new HashSet<>();
+        for(int i = 0; i < checkBoard.length; i++){
+            for(int j = 0; j < checkBoard[i].length; j++){
+                char rowVal = checkBoard[i][j];
+                if(!(checkRowDupes.contains(rowVal))){
+                    if(checkRowDupes.contains('.')){
+                        checkRowDupes.add(rowVal);
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // pre: 
+    // post:
+    private boolean noDuplicateColumnn(char[][] checkBoard){
+        // does not contain any duplicates of 1-9 in COLUMN 
+        // but can with "."
+        Set<Character> checkColDupes = new HashSet<>();
+        int rowCounter = 0;
+        for(int j = 0; j < checkBoard[rowCounter].length; j++){
+            char colValue = checkBoard[rowCounter][j];
+            if(!(checkColDupes.contains(colValue))){
+                if((!(checkColDupes.contains('.'))) || checkColDupes.contains('.')){
+                    checkColDupes.add(colValue);
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private boolean squareDupes(char[][] checkBoard){
+        Set<Character> checkSquareDupes = new HashSet<>();
+        for(int i = 0; i < checkBoard.length; i++){
+            char[][] threeByThree = miniSquare(i);
+            for(int j = 0; j < checkBoard[i].length; j++){
+                char oneNumInNine = threeByThree[i][j];
+                if(!(checkSquareDupes.contains(oneNumInNine))){
+                    if((!(checkSquareDupes.contains('.'))) || checkSquareDupes.contains('.')){
+                        checkSquareDupes.add(oneNumInNine);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    
+    // pre:
+    // post: 
+    private char[][] miniSquare(int spot) {
+      char[][] mini = new char[3][3];
+      for(int r = 0; r < 3; r++) {
+         for(int c = 0; c < 3; c++) {
+            mini[r][c] = board[(spot - 1) / 3 * 3 + r][(spot - 1) % 3 * 3 + c];
+         }
+      }
+      return mini;
+   }
 }
-// TODO HELLOOOOOOO
+
 /*
 
 __________________
