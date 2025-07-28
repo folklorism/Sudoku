@@ -1,7 +1,8 @@
 // Keren Truong
 // CS 143
 // This class implements the game of Sudoku 
-// and establishes the gameboard.
+// and establishes the gameboard. Checks for valid values in the grid
+// and also checks if the board is solved.
 import java.util.*;
 import java.io.*;
 
@@ -73,77 +74,83 @@ public class SudokuBoard {
     // pre:
     // post:
     public boolean isValid(){
-        boolean checkContainsValue = false;
-        Set<Character> matchedBoardVal = new HashSet<>();
-        for(int i = 0; i < board.length; i++){
-            for(int j = 0; j < board[i].length; j++){
-                char newOneChar = board[i][j];
-                if(!(matchedBoardVal.contains(newOneChar))){
-                    matchedBoardVal.add(newOneChar);
-                }
-                checkContainsValue = matchedBoardVal.contains(newOneChar) || matchedBoardVal.contains('.');
-            }
-        }
-        //char[][] threeByThree = miniSquare(5);
-
-        return checkContainsValue && 
-            noDuplicateRow(this.board) && 
-            noDuplicateColumnn(this.board) &&
-            squareDupes(this.board);
+        return checkContainsValue() && 
+            noDuplicateRow() && 
+            noDuplicateColumnn() &&
+            squareDupes();
     }
 
-    // pre:
-    // post:
-    private boolean noDuplicateRow(char[][] checkBoard){
+    private boolean checkContainsValue(){
+        for(int i = 0; i < this.board.length; i++){
+            Set<Character> validValues = new HashSet<>();
+            for(int j = 0; j < this.board[i].length; j++){
+                char oneVal = board[i][j];
+                if(validValues.contains('.')){
+                    if(validValues.contains(oneVal >= '1') || 
+                        validValues.contains(oneVal <= '9')){
+                        return false;
+                    } 
+                    validValues.add(oneVal);
+                }
+            }
+        }
+        return true;
+    }
+
+    // pre: provides a board of 9x9 to check for duplicate numbers between 1-9 for; '.' don't count
+    // post: returns true if no duplicates were found in a row, false otherwise
+    private boolean noDuplicateRow(){
         // does not contain any duplicates of 1-9 in ROW 
         // but can with "."
-        Set<Character> checkRowDupes = new HashSet<>();
-        for(int i = 0; i < checkBoard.length; i++){
-            for(int j = 0; j < checkBoard[i].length; j++){
-                char rowVal = checkBoard[i][j];
-                if(!(checkRowDupes.contains(rowVal))){
-                    if(checkRowDupes.contains('.')){
-                        checkRowDupes.add(rowVal);
+        for(int i = 0; i < board.length; i++){
+            Set<Character> noRowDupes = new HashSet<>();
+            for(int j = 0; j < board[i].length; j++){
+                char oneVal = board[i][j];
+                if(oneVal != '.'){
+                    if(noRowDupes.contains(oneVal)){
+                        return false;
                     }
-                } else {
-                    return false;
+                    noRowDupes.add(oneVal);
                 }
             }
         }
         return true;
     }
 
-    // pre: 
-    // post:
-    private boolean noDuplicateColumnn(char[][] checkBoard){
+    // pre: looks through each column to find duplicate numbers 1-9 in the 9x9 grid
+    // post: returns true if there were no duplicates found in a column; false otherwise
+    private boolean noDuplicateColumnn(){
         // does not contain any duplicates of 1-9 in COLUMN 
         // but can with "."
-        Set<Character> checkColDupes = new HashSet<>();
-        int rowCounter = 0;
-        for(int j = 0; j < checkBoard[rowCounter].length; j++){
-            char colValue = checkBoard[rowCounter][j];
-            if(!(checkColDupes.contains(colValue))){
-                if((!(checkColDupes.contains('.'))) || checkColDupes.contains('.')){
-                    checkColDupes.add(colValue);
-                } else {
-                    return false;
+        for(int i = 0; i < board.length; i++){
+            Set<Character> checkColDupes = new HashSet<>();
+            for(int j = 0; j < board[i].length; j++){
+                char oneVal = board[j][i];
+                if(oneVal != '.'){
+                    if(checkColDupes.contains(oneVal)){
+                        return false;
+                    }
+                    checkColDupes.add(oneVal);
                 }
             }
         }
-
         return true;
     }
 
-    private boolean squareDupes(char[][] checkBoard){
-        Set<Character> checkSquareDupes = new HashSet<>();
-        for(int i = 0; i < checkBoard.length; i++){
-            char[][] threeByThree = miniSquare(i);
-            for(int j = 0; j < checkBoard[i].length; j++){
-                char oneNumInNine = threeByThree[i][j];
-                if(!(checkSquareDupes.contains(oneNumInNine))){
-                    if((!(checkSquareDupes.contains('.'))) || checkSquareDupes.contains('.')){
-                        checkSquareDupes.add(oneNumInNine);
-                        return false;
+    // pre: breaks down the 9x9 grid to 3x3 to check for duplicates in one square
+    // post: returns true if no duplicates were found in one square, false otherwise
+    private boolean squareDupes(){
+        for(int i = 1; i <= 9; i++){
+            Set<Character> checkMiniSquares = new HashSet<>();
+            char[][] miniThree = miniSquare(i);
+            for(int j = 0; j < 3; j++){
+                for(int k = 0; k < 3; k++){
+                    char oneMiniVal = miniThree[j][k]; 
+                    if(oneMiniVal != '.'){
+                        if(checkMiniSquares.contains(oneMiniVal)){
+                            return false;
+                        }
+                        checkMiniSquares.add(oneMiniVal);
                     }
                 }
             }
@@ -151,8 +158,8 @@ public class SudokuBoard {
         return true;
     }
     
-    // pre:
-    // post: 
+    // pre: checks duplicates within the 3x3 squares with helper method
+    // post: returns the 3x3 grid of squares to check for duplicates
     private char[][] miniSquare(int spot) {
       char[][] mini = new char[3][3];
       for(int r = 0; r < 3; r++) {
@@ -161,6 +168,31 @@ public class SudokuBoard {
          }
       }
       return mini;
+   }
+
+   // pre: checks that values are all valid and that 1-9 all have nine counts
+   // post: returns true if values are valid and there are nine counts of each num
+   public boolean isSolved(){
+        Map<Character, Integer> trackGrid = new HashMap<>();
+        boolean isNine = false;
+        for(int i = 0; i < 9; i++){
+            for(int j = 0; j < 9; j++){
+                char oneVal = board[i][j];
+                if(trackGrid.containsKey(oneVal)){
+                    trackGrid.put(oneVal, trackGrid.get(oneVal) + 1);
+                } else {
+                    trackGrid.put(oneVal, 1);
+                }
+            }
+        }
+
+        for(char value : trackGrid.keySet()){
+            int nine = trackGrid.get(value);
+            if(nine == 9){
+                isNine = true;
+            }
+        }
+        return isValid() && isNine;
    }
 }
 
@@ -179,5 +211,15 @@ __________________
 |. 8 1 | . . . | 2 4 . |
 |7 . . | 4 . 2 | . . 1 |
 __________________
+true 
+false 
 
+Checking empty board...passed.
+Checking incomplete, valid board...passed.
+Checking complete, valid board...passed.
+Checking dirty data board...failed.
+Checking row violating board...passed.
+Checking col violating board...passed.
+Checking row&col violating board...passed.
+Checking mini-square violating board...passed.
  */
