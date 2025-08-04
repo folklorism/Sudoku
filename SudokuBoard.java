@@ -12,21 +12,25 @@ public class SudokuBoard {
     private char[][] board;
 
     // pre: gets the file name to fill the Sudoku grid.
-    // throws a FileNotFoundException for the provided file name
+    // throws a try catch FileNotFoundException for the provided file name
     // post: fills the Sudoku grid with the values of the file
-    public SudokuBoard(String theFile) throws FileNotFoundException{
+    public SudokuBoard(String theFile) {
         this.board = new char[9][9];
-        File sudokuFile = new File(theFile);
-        Scanner console = new Scanner(sudokuFile);
+        try{
+            File sudokuFile = new File(theFile);
+            Scanner console = new Scanner(sudokuFile);
 
-        int rowCount = 0;
+            int rowCount = 0;
 
-        while(console.hasNextLine()){
-            String wholeLine = console.nextLine();
-            for(int i = 0; i < this.board.length; i++){
-                board[rowCount][i] = wholeLine.charAt(i);
+            while(console.hasNextLine()){
+                String wholeLine = console.nextLine();
+                for(int i = 0; i < this.board.length; i++){
+                    board[rowCount][i] = wholeLine.charAt(i);
+                }
+                rowCount++;
             }
-            rowCount++;
+        } catch (FileNotFoundException e){
+            System.out.println("Error: File not found: " + theFile);
         }
     }
  
@@ -193,6 +197,33 @@ public class SudokuBoard {
             }
         }
         return isValid() && isNine;
+   }
+
+   public boolean solve(){
+        boolean boardSolved = false;
+        if(!isValid()){
+            return false;
+        } else if(isSolved()){
+            return true;
+        } else {
+            for(int i = 0; i < 9; i++){
+                for(int j = 0; j < 9; j++){
+                    if(board[i][j] == '.'){
+                        // the row is empty --> start trying digits 1 - 9
+                        // to see if any lead to solution
+                        for(int k = 1; k <= 9 && !boardSolved; k++){
+                            board[i][j] = (char)k;
+                            boardSolved = solve();
+                        }
+
+                        if(!isSolved()){
+                            board[i][j] = '.';
+                        }
+                    }
+                }
+            }
+        }
+        return boardSolved;
    }
 }
 

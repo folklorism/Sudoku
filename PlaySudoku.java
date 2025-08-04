@@ -7,10 +7,11 @@ import java.io.*;
 
 public class PlaySudoku{
     public static void main(String[] args) throws FileNotFoundException{
-        SudokuBoard boarded = new SudokuBoard("Sudoku/data1.sdk");
+        SudokuBoard boarded = new SudokuBoard("Sudoku/very-fast-solve.sdk");
         System.out.println(boarded.toString());
 
-
+        System.out.println(boarded.isValid());
+        System.out.println(boarded.isSolved());
     }
 }
 
@@ -29,5 +30,6 @@ __________________
 |. 8 1 | . . . | 2 4 . |
 |7 . . | 4 . 2 | . . 1 |
 __________________
-
+true
+false
  */
